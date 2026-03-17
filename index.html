@@ -190,6 +190,140 @@
       .hero { margin-bottom: 40px; }
       .project-grid { gap: 16px; }
     }
+
+    /* Chat Button */
+    .chat-toggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--accent-glow), 0 0 40px var(--accent-glow);
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+    .chat-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px var(--accent-glow), 0 0 60px var(--accent-glow);
+    }
+    .chat-toggle svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--bg-primary);
+    }
+
+    /* Chat Window */
+    .chat-window {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      width: 380px;
+      max-width: calc(100vw - 32px);
+      max-height: calc(100vh - 100px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px var(--accent-glow);
+      z-index: 101;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .chat-window.active {
+      display: flex;
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .chat-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .chat-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .chat-close:hover { color: var(--accent); }
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .message {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      animation: fadeInUp 0.3s ease;
+    }
+    .message.user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+    .message.ai {
+      align-self: flex-start;
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .chat-input {
+      display: flex;
+      gap: 10px;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .chat-input input:focus {
+      border-color: var(--accent);
+    }
+    .chat-input button {
+      padding: 12px 20px;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: var(--bg-primary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chat-input button:hover {
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
   </style>
 </head>
 <body>
@@ -240,5 +374,58 @@
       下一步：帮我把这个站点免费上线
     </footer>
   </div>
+
+  <!-- Chat Button -->
+  <button class="chat-toggle" onclick="toggleChat()">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+  </button>
+
+  <!-- Chat Window -->
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <h3>AI Assistant</h3>
+      <button class="chat-close" onclick="toggleChat()">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
+      <button onclick="sendMessage()">发送</button>
+    </div>
+  </div>
+
+  <script>
+    function toggleChat() {
+      const chatWindow = document.getElementById('chatWindow');
+      chatWindow.classList.toggle('active');
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') sendMessage();
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const messages = document.getElementById('chatMessages');
+      const text = input.value.trim();
+      if (!text) return;
+
+      // User message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'message user';
+      userMsg.textContent = text;
+      messages.appendChild(userMsg);
+
+      input.value = '';
+
+      // AI response
+      setTimeout(() => {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'message ai';
+        aiMsg.textContent = 'Hello, I am your AI builder assistant.';
+        messages.appendChild(aiMsg);
+        messages.scrollTop = messages.scrollHeight;
+      }, 500);
+    }
+  </script>
 </body>
 </html>
